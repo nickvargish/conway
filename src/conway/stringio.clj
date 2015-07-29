@@ -14,11 +14,11 @@
   (set (remove nil? (flatten
                       (let [lines (strings/split-lines in)]
                         (for [y (range (count lines))]
-                          (let [l (get lines y)]
-                            (for [x (range (count l))]
-                              (let [c (get l x)]
-                                (if (not (or (= c \space) (= c \.)))
-                                  (logic/make-cell x y) ))))))))))
+                             (let [l (get lines y)]
+                               (for [x (range (count l))]
+                                (let [c (get l x)]
+                                  (if (not (or (= c \space) (= c \.)))
+                                    (logic/make-cell x y) ))))))))))
 
 ;;
 ;; Output
