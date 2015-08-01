@@ -8,17 +8,45 @@
 ;; Input
 ;;
 
+;
+; Life 1.05 (*.lif, *.life)
+;
+
+(defn parse-life105-row
+  [s xo yo]
+  (let [cl (seq s)
+        cs (count cl)]
+    (remove nil? (map #(when (not (or (= %1 \space) (= %1 \.)))
+                        (logic/make-cell (+ %2 xo) yo))
+                      cl (range cs)))))
+
+(defn parse-life105-block
+  ([s xo yo]
+   (let [rows (strings/split-lines s)
+         rs   (count rows)]
+     (set (flatten (map #(parse-life105-row %1 xo (+ %2 yo))
+                        rows (range rs))))))
+  ([s] (parse-life105-block s 0 0)))
+
+;
+; Life 1.06 (*.lif, *.life)
+;
+
+(defn parse-life106-block
+  [s]
+  (set (let [rows (strings/split-lines s)]
+         (map #(let [cs (strings/split % #" ")]
+                (logic/make-cell (read-string (first cs))
+                                 (read-string (last cs)))) rows))))
+
+;
+; Misc formats
+;
+
 (defn string-to-cells
   "Returns the set of cells that corresponds to the input string."
-  [in]
-  (set (remove nil? (flatten
-                      (let [lines (strings/split-lines in)]
-                        (for [y (range (count lines))]
-                             (let [l (get lines y)]
-                               (for [x (range (count l))]
-                                (let [c (get l x)]
-                                  (if (not (or (= c \space) (= c \.)))
-                                    (logic/make-cell x y) ))))))))))
+  [s]
+  (parse-life105-block s))
 
 (defn parse-rule-string
   "Returns a map of rules described in rule."
@@ -26,8 +54,7 @@
   (let [r (map (fn [s1] (map (fn [s2] (read-string s2))
                              (strings/split s1 #"")))
                (strings/split rule #"/"))]
-    {:survival (first r), :birth (last r)}
-    ))
+    {:survival (first r), :birth (last r)}))
 
 
 ;;
