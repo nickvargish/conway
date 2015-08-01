@@ -20,6 +20,16 @@
                                   (if (not (or (= c \space) (= c \.)))
                                     (logic/make-cell x y) ))))))))))
 
+(defn parse-rule-string
+  "Returns a map of rules described in rule."
+  [rule]
+  (let [r (map (fn [s1] (map (fn [s2] (read-string s2))
+                             (strings/split s1 #"")))
+               (strings/split rule #"/"))]
+    {:survival (first r), :birth (last r)}
+    ))
+
+
 ;;
 ;; Output
 ;;
