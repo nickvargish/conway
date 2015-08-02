@@ -4,62 +4,66 @@
     [conway.logic :as logic]))
 
 
-;;
-;; Input
-;;
+;;;
+;;; Input
+;;;
 
-;
-; Life 1.05 (*.lif, *.life)
-;
+;; Utility
+
+(defn string->integer
+  [s] (when-let [d (re-find #"\d+" s)] (Integer. d)))
+
+;;
+;; Life 1.05 (*.lif, *.life)
+;;
 
 (defn parse-life105-row
   [s xo yo]
   (let [cl (seq s)
         cs (count cl)]
-    (remove nil? (map #(when (not (or (= %1 \space) (= %1 \.)))
-                        (logic/make-cell (+ %2 xo) yo))
+    (remove nil? (map (fn [c x] (when (not (or (= c \space) (= c \.)))
+                        (logic/make-cell (+ x xo) yo)))
                       cl (range cs)))))
 
 (defn parse-life105-block
   ([s xo yo]
    (let [rows (strings/split-lines s)
          rs   (count rows)]
-     (set (flatten (map #(parse-life105-row %1 xo (+ %2 yo))
+     (set (flatten (map (fn [r y] (parse-life105-row r xo (+ y yo)))
                         rows (range rs))))))
   ([s] (parse-life105-block s 0 0)))
 
-;
-; Life 1.06 (*.lif, *.life)
-;
+;;
+;; Life 1.06 (*.lif, *.life)
+;;
 
 (defn parse-life106-block
   [s]
   (set (let [rows (strings/split-lines s)]
          (map #(let [cs (strings/split % #" ")]
-                (logic/make-cell (read-string (first cs))
-                                 (read-string (last cs)))) rows))))
+                (logic/make-cell (string->integer (first cs))
+                                 (string->integer (last cs)))) rows))))
 
-;
-; Misc formats
-;
+;;
+;; Misc formats
+;;
 
 (defn string-to-cells
   "Returns the set of cells that corresponds to the input string."
-  [s]
-  (parse-life105-block s))
+  [s] (parse-life105-block s))
 
 (defn parse-rule-string
-  "Returns a map of rules described in rule."
+  "Returns a map of rules described in survival/birth format."
   [rule]
-  (let [r (map (fn [s1] (map (fn [s2] (read-string s2))
+  (let [r (map (fn [s1] (map (fn [s2] (string->integer s2))
                              (strings/split s1 #"")))
                (strings/split rule #"/"))]
-    {:survival (first r), :birth (last r)}))
+    {:survival (sort (first r)), :birth (sort (last r))}))
 
 
-;;
-;; Output
-;;
+;;;
+;;; Output
+;;;
 
 (defn get-dimensions
   "Returns the minimum and maximum x and y values for a population of cells."
