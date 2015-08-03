@@ -11,6 +11,11 @@
   [x y]
   { :x x :y y })
 
+(defn in?
+  [coll x] (some (partial = x) coll))
+
+(def normal-rule {:survival '(2 3) :birth '(3)})
+
 (defn neighbor-cells
   "Returns a set of the cells neighboring (x, y)."
   [{:keys [x y]}]
@@ -20,25 +25,30 @@
 
 (defn alive-next-gen?
   "Takes a cell and a population, returns true if that cell will be alive in the next generation."
-  [cell alive]
-  (let [ncount (count (sets/intersection (neighbor-cells cell) alive))]
-    (if (nil? (alive cell))
-      (= 3 ncount)
-      (or (= 2 ncount) (= 3 ncount)))))
+  ([rule alive cell]
+    (let [ncount (count (sets/intersection (neighbor-cells cell) alive))]
+      (if (nil? (alive cell))
+        (in? (rule :birth) ncount)
+        (in? (rule :survival) ncount))))
+  ([alive cell] (alive-next-gen? normal-rule alive cell)))
 
 (defn next-generation
   "Generates the next generation of living cells from a set of cells."
-  [alive]
-  (set (filter #(alive-next-gen? % alive)
-               (sets/union (apply sets/union (map neighbor-cells alive)) alive))))
+  ([rule alive]
+   (set (filter (partial alive-next-gen? rule alive)
+                (sets/union (apply sets/union (map neighbor-cells alive)) alive))))
+  ([alive] (next-generation normal-rule alive)))
 
 (defn generations
   "Generates n generations starting with cells."
-  [cells n]
-  (take n (iterate next-generation cells)))
+  ([rule cells n]
+   (take n (iterate (partial next-generation rule) cells)))
+  ([cells n] (generations normal-rule cells n)))
 
 (defn nth-generation
   "Generates the nth generation starting with cells."
-  [cells n]
-  (nth (iterate next-generation cells) n))
+  ([rule cells n]
+    (nth (iterate next-generation rule cells) n))
+  ([cells n] (nth-generation normal-rule cells n)))
+
 

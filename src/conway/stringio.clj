@@ -11,8 +11,16 @@
 ;; Utility
 
 (defn string->integer
-  [s] (when-let [d (re-find #"\d+" s)] (Integer. d)))
+  [s] (when-let [d (re-find #"-?\d+" s)] (Integer. d)))
 
+
+(defn parse-rule-string
+  "Returns a map of rules described in survival/birth format."
+  [rule]
+  (let [r (map (fn [s1] (map (fn [s2] (string->integer s2))
+                             (strings/split s1 #"")))
+               (strings/split rule #"/"))]
+    {:survival (sort (first r)), :birth (sort (last r))}))
 ;;
 ;; Life 1.05 (*.lif, *.life)
 ;;
@@ -26,13 +34,36 @@
                       cl (range cs)))))
 
 (defn parse-life105-block
-  ([s xo yo]
-   (let [rows (strings/split-lines s)
-         rs   (count rows)]
-     (set (flatten (map (fn [r y] (parse-life105-row r xo (+ y yo)))
-                        rows (range rs))))))
-  ([s] (parse-life105-block s 0 0)))
+  [block]
+  (let [pstr (last (re-find #"^#P (.*)" (first block)))
+        pl   (when pstr (strings/split pstr #" "))
+        xo   (if pstr (string->integer (first pl)) 0)
+        yo   (if pstr (string->integer (last pl)) 0)
+        rows (if pstr (rest block) block)
+        rs   (count rows)]
+    (map (fn [r y] (parse-life105-row r xo (+ y yo)))
+                        rows (range rs))))
 
+(defn parse-life105-blocks
+  [blocks]
+  (flatten (map parse-life105-block blocks)))
+
+(defn partition-life105-blocks
+  [rows]
+  (let [bcount (atom 0)]
+    (partition-by #(do
+                    (when (re-find #"^#P" %)
+                      (reset! bcount (inc @bcount)))
+                    @bcount) rows)))
+
+(defn parse-life105-data
+  [lines]
+  (let [rstr  (last (first (keep (partial re-find #"^#R (\d+/\d+)") lines)))
+        rule  (if (nil? rstr) logic/normal-rule (parse-rule-string rstr))
+        cstrs (map first (keep (partial re-find #"^([.*]|#P).*") lines))
+        cblks (partition-life105-blocks cstrs)
+        cells (set (parse-life105-blocks cblks))]
+    {:cells cells :rule rule}))
 
 ;;
 ;; Life 1.06 (*.lif, *.life)
@@ -49,22 +80,9 @@
 ;; Misc formats
 ;;
 
-;(def fl (clojure.string/split-lines (slurp "rpentomino.life")))
-;(last (first (keep #(re-find #"^#R (\d+/\d+)" %) fl)))
-;=> "23/3"
-
 (defn string-to-cells
   "Returns the set of cells that corresponds to the input string."
-  [s] (parse-life105-block s))
-
-(defn parse-rule-string
-  "Returns a map of rules described in survival/birth format."
-  [rule]
-  (let [r (map (fn [s1] (map (fn [s2] (string->integer s2))
-                             (strings/split s1 #"")))
-               (strings/split rule #"/"))]
-    {:survival (sort (first r)), :birth (sort (last r))}))
-
+  [s] (parse-life105-block (strings/split-lines s)))
 
 ;;;
 ;;; Output
