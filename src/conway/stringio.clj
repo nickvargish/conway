@@ -4,35 +4,71 @@
     [conway.logic :as logic]))
 
 
+;;;
+;;; Input
+;;;
+
+;; Utility
+
+(defn string->integer
+  [s] (when-let [d (re-find #"\d+" s)] (Integer. d)))
+
 ;;
-;; Input
+;; Life 1.05 (*.lif, *.life)
 ;;
+
+(defn parse-life105-row
+  [s xo yo]
+  (let [cl (seq s)
+        cs (count cl)]
+    (remove nil? (map (fn [c x] (when (not (or (= c \space) (= c \.)))
+                        (logic/make-cell (+ x xo) yo)))
+                      cl (range cs)))))
+
+(defn parse-life105-block
+  ([s xo yo]
+   (let [rows (strings/split-lines s)
+         rs   (count rows)]
+     (set (flatten (map (fn [r y] (parse-life105-row r xo (+ y yo)))
+                        rows (range rs))))))
+  ([s] (parse-life105-block s 0 0)))
+
+
+;;
+;; Life 1.06 (*.lif, *.life)
+;;
+
+(defn parse-life106-block
+  [s]
+  (set (let [rows (strings/split-lines s)]
+         (map #(let [cs (strings/split % #" ")]
+                (logic/make-cell (string->integer (first cs))
+                                 (string->integer (last cs)))) rows))))
+
+;;
+;; Misc formats
+;;
+
+;(def fl (clojure.string/split-lines (slurp "rpentomino.life")))
+;(last (first (keep #(re-find #"^#R (\d+/\d+)" %) fl)))
+;=> "23/3"
 
 (defn string-to-cells
   "Returns the set of cells that corresponds to the input string."
-  [in]
-  (set (remove nil? (flatten
-                      (let [lines (strings/split-lines in)]
-                        (for [y (range (count lines))]
-                             (let [l (get lines y)]
-                               (for [x (range (count l))]
-                                (let [c (get l x)]
-                                  (if (not (or (= c \space) (= c \.)))
-                                    (logic/make-cell x y) ))))))))))
+  [s] (parse-life105-block s))
 
 (defn parse-rule-string
-  "Returns a map of rules described in rule."
+  "Returns a map of rules described in survival/birth format."
   [rule]
-  (let [r (map (fn [s1] (map (fn [s2] (read-string s2))
+  (let [r (map (fn [s1] (map (fn [s2] (string->integer s2))
                              (strings/split s1 #"")))
                (strings/split rule #"/"))]
-    {:survival (first r), :birth (last r)}
-    ))
+    {:survival (sort (first r)), :birth (sort (last r))}))
 
 
-;;
-;; Output
-;;
+;;;
+;;; Output
+;;;
 
 (defn get-dimensions
   "Returns the minimum and maximum x and y values for a population of cells."
