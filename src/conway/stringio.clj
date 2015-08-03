@@ -30,7 +30,7 @@
   (let [cl (seq s)
         cs (count cl)]
     (remove nil? (map (fn [c x] (when (not (or (= c \space) (= c \.)))
-                        (logic/make-cell (+ x xo) yo)))
+                                  (logic/make-cell (+ x xo) yo)))
                       cl (range cs)))))
 
 (defn parse-life105-block
@@ -43,10 +43,6 @@
         rs   (count rows)]
     (map (fn [r y] (parse-life105-row r xo (+ y yo)))
                         rows (range rs))))
-
-(defn parse-life105-blocks
-  [blocks]
-  (flatten (map parse-life105-block blocks)))
 
 (defn partition-life105-blocks
   [rows]
@@ -61,9 +57,9 @@
   (let [rstr  (last (first (keep (partial re-find #"^#R (\d+/\d+)") lines)))
         rule  (if (nil? rstr) logic/normal-rule (parse-rule-string rstr))
         cstrs (map first (keep (partial re-find #"^([.*]|#P).*") lines))
-        cblks (partition-life105-blocks cstrs)
-        cells (set (parse-life105-blocks cblks))]
-    {:cells cells :rule rule}))
+        cells (->> cstrs (partition-life105-blocks) (map parse-life105-block) (flatten) (set))
+        desc  (strings/join \newline (map last (keep (partial re-find #"^#D (.*)") lines)))]
+    {:cells cells :rule rule :description desc}))
 
 ;;
 ;; Life 1.06 (*.lif, *.life)
