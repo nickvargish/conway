@@ -33,6 +33,7 @@
                         rows (range rs))))))
   ([s] (parse-life105-block s 0 0)))
 
+
 ;;
 ;; Life 1.06 (*.lif, *.life)
 ;;
@@ -47,6 +48,10 @@
 ;;
 ;; Misc formats
 ;;
+
+;(def fl (clojure.string/split-lines (slurp "rpentomino.life")))
+;(last (first (keep #(re-find #"^#R (\d+/\d+)" %) fl)))
+;=> "23/3"
 
 (defn string-to-cells
   "Returns the set of cells that corresponds to the input string."
