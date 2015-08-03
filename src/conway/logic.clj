@@ -16,7 +16,7 @@
   [{:keys [x y]}]
   (set (for [dx [-1 0 1] dy [-1 0 1]
              :when (not (and (zero? dx) (zero? dy)))]
-         { :x (+ x dx) :y (+ y dy) })))
+         (make-cell (+ x dx) (+ y dy)))))
 
 (defn alive-next-gen?
   "Takes a cell and a population, returns true if that cell will be alive in the next generation."
