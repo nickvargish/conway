@@ -10,12 +10,6 @@
 ;; Testing
 ;;
 
-(defn -main
-  "Runs 12 gerations of R-Pentomino, then displays 98th generation."
-  [& args]
-  (let [r-pentomino (stringio/string-to-cells ".**\n**.\n.*.")]
-    (console/print-generations r-pentomino 12)
-    (console/print-nth-generation r-pentomino 98)))
 
 (defn run-file
   [fn n]
@@ -26,4 +20,13 @@
                         (stringio/cells-to-string %1)))
          (logic/generations (world :rule) (world :cells) n)
          (range 1 (+ n 1)))))
+
+(defn -main
+  "Usage: conway data-file-path number-of-generations"
+  [& args]
+  (let [fname (first args)
+        ngen  (stringio/string->integer (last args))]
+    (println (str "filename=" fname "  generations=" ngen))
+    (run-file fname ngen)
+    (println "Done!")))
 

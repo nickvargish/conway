@@ -1,10 +1,11 @@
 # conway
 
-FIXME: description
+Conway's Game of Life implemented in Clojure.
 
-## Installation
+## Compilation
 
-Download from http://example.com/FIXME.
+Download from https://github.com/nickvargish/conway.
+
 
 ## Usage
 
