@@ -6,15 +6,16 @@
 ;; Logic
 ;;
 
-(defn make-cell
-  "Returns a map representing a cell."
-  [x y]
-  { :x x :y y })
-
-(defn in?
-  [coll x] (some (partial = x) coll))
 
 (def normal-rule {:survival '(2 3) :birth '(3)})
+
+(defn make-cell
+  "Returns a map representing a cell."
+  [x y] { :x x :y y })
+
+(defn in?
+  "Returns true if y exists in coll, such that y equals x."
+  [coll x] (some (partial = x) coll))
 
 (defn neighbor-cells
   "Returns a set of the cells neighboring (x, y)."
@@ -24,7 +25,8 @@
          (make-cell (+ x dx) (+ y dy)))))
 
 (defn alive-next-gen?
-  "Takes a cell and a population, returns true if that cell will be alive in the next generation."
+  "Takes a cell and a population, returns true if that cell will be alive
+  in the next generation."
   ([rule alive cell]
     (let [ncount (count (sets/intersection (neighbor-cells cell) alive))]
       (if (nil? (alive cell))
@@ -36,7 +38,8 @@
   "Generates the next generation of living cells from a set of cells."
   ([rule alive]
    (set (filter (partial alive-next-gen? rule alive)
-                (sets/union (apply sets/union (map neighbor-cells alive)) alive))))
+                (sets/union (apply sets/union (map neighbor-cells alive))
+                            alive))))
   ([alive] (next-generation normal-rule alive)))
 
 (defn generations

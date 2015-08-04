@@ -19,8 +19,8 @@
 
 (defn run-file
   [fn n]
-  (let [data (strings/split-lines (slurp fn))
-        world (stringio/parse-life105-data data)]
+  (let [world (-> fn (slurp) (strings/split-lines)
+                  (stringio/parse-life105-data))]
     (println (str (world :description) "\n"))
     (map #(println (str (stringio/cells-to-string %) "\n"))
          (logic/generations (world :rule) (world :cells) n))))

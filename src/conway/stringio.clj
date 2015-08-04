@@ -20,7 +20,7 @@
   (let [r (map (fn [s1] (map (fn [s2] (string->integer s2))
                              (strings/split s1 #"")))
                (strings/split rule #"/"))]
-    {:survival (sort (first r)), :birth (sort (last r))}))
+    {:survival (sort (first r)) :birth (sort (last r))}))
 ;;
 ;; Life 1.05 (*.lif, *.life)
 ;;
@@ -54,11 +54,14 @@
 
 (defn parse-life105-data
   [lines]
-  (let [rstr  (last (first (keep (partial re-find #"^#R (\d+/\d+)") lines)))
-        rule  (if (nil? rstr) logic/normal-rule (parse-rule-string rstr))
-        cstrs (map first (keep (partial re-find #"^([.*]|#P).*") lines))
-        cells (->> cstrs (partition-life105-blocks) (map parse-life105-block) (flatten) (set))
-        desc  (strings/join \newline (map last (keep (partial re-find #"^#D (.*)") lines)))]
+  (let [rule  (->> lines (keep (partial re-find #"^#R (\d+/\d+)"))
+                   (first) (last)
+                   (#(if (nil? %) logic/normal-rule (parse-rule-string %))))
+        cells (->> lines  (keep (partial re-find #"^([.*]|#P).*")) (map first)
+                   (partition-life105-blocks) (map parse-life105-block)
+                   (flatten) (set))
+        desc  (->> lines  (keep (partial re-find #"^#D (.*)")) (map last)
+                   (strings/join \newline))]
     {:cells cells :rule rule :description desc}))
 
 ;;
