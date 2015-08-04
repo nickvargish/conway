@@ -22,6 +22,8 @@
   (let [world (-> fn (slurp) (strings/split-lines)
                   (stringio/parse-life105-data))]
     (println (str (world :description) "\n"))
-    (map #(println (str (stringio/cells-to-string %) "\n"))
-         (logic/generations (world :rule) (world :cells) n))))
+    (map #(println (str "[ gen: " %2 " | cells: " (count %1) " ]\n"
+                        (stringio/cells-to-string %1)))
+         (logic/generations (world :rule) (world :cells) n)
+         (range 1 (+ n 1)))))
 
