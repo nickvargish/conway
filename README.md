@@ -2,16 +2,13 @@
 
 Conway's Game of Life implemented in Clojure.
 
-## Compilation
+## Usage
 
 Download from https://github.com/nickvargish/conway.
 
-
-## Usage
-
-FIXME: explanation
-
-    $ java -jar conway-0.1.0-standalone.jar [args]
+```$ lein repl
+conway.core=> (run-file "data/pulsar.life" 10)
+```
 
 ## Options
 
@@ -25,13 +22,9 @@ FIXME: listing of options this app accepts.
 
 ...
 
-### Any Other Sections
-### That You Think
-### Might be Useful
-
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2015 Nick Vargish <nick@vargish.org>
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
